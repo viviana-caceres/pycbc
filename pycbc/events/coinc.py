@@ -225,6 +225,97 @@ def time_coincidence(t1, t2, window, slide_step=0):
     return idx1, idx2, slide
 
 
+def time_coincidence_by_time_delay(
+    t1,
+    t2,
+    delay,
+    slide_step=0,
+    ):
+    """ Find coincidences by time window
+    Parameters
+    ----------
+    t1 : numpy.ndarray
+        Array of trigger times from the first detector
+    t2 : numpy.ndarray
+        Array of trigger times from the second detector
+    delay: float
+        Time delay between detectors, negative if second detector detects signal before first detector, arbitrary units (usually s)
+    slide_step : float (default 0)
+        If calculating background coincidences, the interval between background
+        slides, arbitrary units (usually s)
+    Returns
+    -------
+    idx1 : numpy.ndarray
+        Array of indices into the t1 array for coincident triggers
+    idx2 : numpy.ndarray
+        Array of indices into the t2 array
+    slide : numpy.ndarray
+        Array of slide ids
+    """
+
+    if slide_step:
+        length1 = len(t1)
+        length2 = len(t2)
+        fold1 = numpy.zeros(length1, dtype=numpy.float64)
+        fold2 = numpy.zeros(length2, dtype=numpy.float64)
+        construct_fold(
+            fold1,
+            fold2,
+            t1,
+            t2,
+            slide_step,
+            length1,
+            length2,
+            )
+    else:
+        fold1 = t1
+        fold2 = t2
+
+    sort1 = fold1.argsort()
+    sort2 = fold2.argsort()
+
+    fold1 = fold1[sort1]
+    fold2 = fold2[sort2]
+
+    if slide_step:
+
+        # FIXME explain this
+
+        fold2 = numpy.concatenate([fold2 - slide_step, fold2, fold2
+                                  + slide_step])
+
+    lenidx = find_lenidx(fold1, fold2, delay)
+    idx1 = numpy.zeros(lenidx, dtype=numpy.uint32)
+    idx2 = numpy.zeros(lenidx, dtype=numpy.uint32)
+    construct_idxs(
+        idx1,
+        idx2,
+        sort1,
+        sort2,
+        fold1,
+        fold2,
+        slide_step,
+        )
+
+    # Now assign a slide to each trigger found
+
+    slide = numpy.zeros(lenidx, dtype=numpy.int32)
+    if slide_step:
+        get_slide_int(
+            slide,
+            t1,
+            t2,
+            idx1,
+            idx2,
+            delay,
+            slide_step,
+            )
+    else:
+        slide = numpy.zeros(len(idx1))
+
+    return (idx1, idx2, slide)
+
+
 def time_multi_coincidence(times, slide_step=0, slop=.003,
                            pivot='H1', fixed='L1'):
     """ Find multi detector coincidences.
