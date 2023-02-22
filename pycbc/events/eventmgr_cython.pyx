@@ -306,3 +306,104 @@ def timecluster_cython(
         elif max_loc < i:
             i += 1
     return j
+
+
+@boundscheck(False)
+@wraparound(False)
+@cdivision(True)
+def pynu_timecoincidence_findidxlen(
+    double[:] fold1,
+    double[:] fold2,
+    double delay,
+):
+    cdef:
+        int idx, tslength
+        cnp.ndarray[cnp.double_t, ndim=1] correct_values
+
+    # Initialize the correct_values array with zeros
+    correct_values = np.zeros(len(fold1))
+
+    # We need to find what values would correspond to the given
+    # delay for each trigger in fold1
+    for idx in range(len(fold1)):
+        correct_values[idx] = fold1[idx] + delay
+
+    tslength = 0
+    for correct_value in correct_values:
+        # We find how many triggers in fold2 have the correct
+        # value to coincide with each trigger in fold1
+        for idx in range(len(fold2)): # This can later be changed to include an error
+            if fold2[idx] == correct_value:
+                tslength += 1
+
+    return tslength
+
+
+@boundscheck(False)
+@wraparound(False)
+@cdivision(True)
+def pynu_timecoincidence_constructidxs(
+    cnp.ndarray[cnp.uint32_t, ndim=1] idx1,
+    cnp.ndarray[cnp.uint32_t, ndim=1] idx2,
+    long int[:] sort1,
+    long int[:] sort2,
+    long int[:] fold1,
+    long int[:] fold2,
+    double slide_step,
+    double delay
+):
+    cdef:
+        int idx, jdx, count
+        unsigned int[:] indices_of_correct_delays
+
+    # Construct sort1
+    count = 0
+    # For each trigger in fold1...
+    for idx in range(len(fold1)):
+        # We find where fold2 is equal to fold1 + delay
+        indices_of_correct_delays = np.array([], dtype=int)
+        for jdx in range(len(fold2)):
+            if fold2[jdx] == fold1[idx] + delay:
+                indices_of_correct_delays = np.append(indices_of_correct_delays, jdx)
+
+        if slide_step:
+        # Since fold2 is three times the length it should be, I
+        # need to change the indices
+            indices_of_correct_delays %= int(len(fold2)/3)
+
+        # Now we fill up our array with the indices of the correct delays
+        for jdx in indices_of_correct_delays:
+
+            # First we fill up idx1 with the index of the current trigger we are analyzing
+            idx1[count] = sort1[idx]
+
+            # Then we fill up idx2 with the index of the coinc triggers with the right delay
+            idx2[count] = sort2[jdx]
+            count += 1
+
+    # Now we can sort our results
+    idx2 = idx2[np.argsort(idx1)]
+    idx1 = np.sort(idx1)
+
+
+@boundscheck(False)
+@wraparound(False)
+@cdivision(True)
+def pynu_timecoincidence_getslideint(
+    int [:] slide,
+    double[:] t1,
+    double[:] t2,
+    unsigned int[:] idx1,
+    unsigned int[:] idx2,
+    double delay,
+    double slide_step
+):
+    cdef:
+        int idx, length
+
+    length = idx1.shape[0]
+
+    for idx in range(length):
+        diff = (t1[idx1[idx]] - t2[idx2[idx]] + delay) / slide_step
+        slide[idx] = <int>(cround(diff))
+
