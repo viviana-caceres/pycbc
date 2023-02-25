@@ -34,8 +34,16 @@ parser.add_argument("--fixed-ifo", required=True,
                          "multi detector coincidence")
 # produces a list of lists to allow multiple invocations and multiple args
 parser.add_argument("--use-maxalpha", action="store_true")
-parser.add_argument("--coinc-threshold", type=float, default=0.0,
-                    help="Seconds to add to time-of-flight coincidence window")
+
+# Sky location and time delay options
+parser.add_argument("--ra", type=float,
+                    help="Right ascension of external trigger, in radians")
+parser.add_argument("--dec", type=float,
+                    help="Declination of external trigger, in radians")
+parser.add_argument("--trigger-time", type=int,
+                    help="Time of the external trigger, used to find the"
+                         " time delay between detectors.")
+
 parser.add_argument("--timeslide-interval", type=float,
                     help="Interval between timeslides in seconds. Timeslides are"
                          " disabled if the option is omitted.")
