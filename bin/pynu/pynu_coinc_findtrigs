@@ -314,12 +314,13 @@ def process_template(tnum):
         if len(threshes) > 1:
             fixed_ifos = [i for i in trigs.ifos if i != args.pivot_ifo]
             fixed_times = {i: times[i] for i in fixed_ifos}
-
+                                                                               x
             if len(fixed_ifos) > 1:
-                fixed_ids, fixed_slide = coinc.time_multi_coincidence(fixed_times, 0.,
-                                                                      args.coinc_threshold,
-                                                                      fixed_ifos[0],
-                                                                      fixed_ifos[1])
+                fixed_ids, fixed_slide = \
+                    coinc.time_multi_coincidence_by_time_delay(fixed_times, 0.,
+                                                               args.coinc_threshold,
+                                                               fixed_ifos[0],
+                                                               fixed_ifos[1])
                 if len(fixed_slide) == 0:
                     start0 += args.batch_singles
                     continue
@@ -368,7 +369,7 @@ def process_template(tnum):
             tids[args.pivot_ifo] = tids_full[args.pivot_ifo][pivot_idxs]
 
             # Do time coincidence for slides that will be kept after the last decimation
-            ids, slide = coinc.time_multi_coincidence(times,
+            ids, slide = coinc.time_multi_coincidence_by_time_delay(times,
                                                       args.timeslide_interval*total_factors[-1],
                                                       args.coinc_threshold,
                                                       args.pivot_ifo,
@@ -428,7 +429,7 @@ def process_template(tnum):
                 test_times[args.pivot_ifo] = times[args.pivot_ifo][pivot_cut:]
 
                 # Do time coincidence for the current decimation factor
-                set_ids, set_slide = coinc.time_multi_coincidence(test_times,
+                set_ids, set_slide = coinc.time_multi_coincidence_by_time_delay(test_times,
                                                                   args.timeslide_interval*total_factors[kidx - 1],
                                                                   args.coinc_threshold,
                                                                   args.pivot_ifo,
