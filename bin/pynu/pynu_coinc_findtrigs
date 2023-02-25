@@ -86,6 +86,11 @@ args.segment_name = sum(args.segment_name, [])
 args.veto_files = sum(args.veto_files, [])
 args.trigger_files = sum(args.trigger_files, [])
 
+# Store sky location information in a dictionary
+skyloc = {'t_gps': args.trigger_time,
+          'ra': args.ra,
+          'dec': args.dec}
+
 if args.verbose:
     logging.basicConfig(format='%(asctime)s : %(message)s', level=logging.DEBUG)
 
@@ -325,9 +330,8 @@ def process_template(tnum):
 
             if len(fixed_ifos) > 1:
                 fixed_ids, fixed_slide = \
-                    coinc.time_multi_coincidence_by_time_delay(fixed_times, 0.,
-                                                               args.coinc_threshold,
-                                                               fixed_ifos[0],
+                    coinc.time_multi_coincidence_by_time_delay(fixed_times, skyloc,
+                                                               0., fixed_ifos[0],
                                                                fixed_ifos[1])
                 if len(fixed_slide) == 0:
                     start0 += args.batch_singles
@@ -377,9 +381,8 @@ def process_template(tnum):
             tids[args.pivot_ifo] = tids_full[args.pivot_ifo][pivot_idxs]
 
             # Do time coincidence for slides that will be kept after the last decimation
-            ids, slide = coinc.time_multi_coincidence_by_time_delay(times,
+            ids, slide = coinc.time_multi_coincidence_by_time_delay(times, skyloc,
                                                       args.timeslide_interval*total_factors[-1],
-                                                      args.coinc_threshold,
                                                       args.pivot_ifo,
                                                       args.fixed_ifo)
             slide *= total_factors[-1]
@@ -437,9 +440,8 @@ def process_template(tnum):
                 test_times[args.pivot_ifo] = times[args.pivot_ifo][pivot_cut:]
 
                 # Do time coincidence for the current decimation factor
-                set_ids, set_slide = coinc.time_multi_coincidence_by_time_delay(test_times,
+                set_ids, set_slide = coinc.time_multi_coincidence_by_time_delay(test_times, skyloc,
                                                                   args.timeslide_interval*total_factors[kidx - 1],
-                                                                  args.coinc_threshold,
                                                                   args.pivot_ifo,
                                                                   args.fixed_ifo)
                 set_slide *= total_factors[kidx - 1]

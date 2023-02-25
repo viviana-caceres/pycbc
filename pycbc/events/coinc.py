@@ -409,7 +409,7 @@ def time_multi_coincidence(times, slide_step=0, slop=.003,
     return ids, slide
 
 
-def time_multi_coincidence_by_time_delay(times, slide_step=0, slop=.003,
+def time_multi_coincidence_by_time_delay(times, skyloc, slide_step=0,
                            pivot='H1', fixed='L1'):
     """ Find multi detector coincidences.
 
@@ -417,10 +417,10 @@ def time_multi_coincidence_by_time_delay(times, slide_step=0, slop=.003,
     ----------
     times: dict of numpy.ndarrays
         Dictionary keyed by ifo of single ifo trigger times
+    skyloc: dict
+        Dictionary containing 't_gps', 'ra', and 'dec' of external trigger
     slide_step: float
         Interval between time slides
-    slop: float
-        The amount of time to add to the TOF between detectors for coincidence
     pivot: str
         The ifo to which time shifts are applied in first stage coincidence
     fixed: str
