@@ -322,7 +322,7 @@ def process_template(tnum):
         if len(threshes) > 1:
             fixed_ifos = [i for i in trigs.ifos if i != args.pivot_ifo]
             fixed_times = {i: times[i] for i in fixed_ifos}
-                                                                               x
+
             if len(fixed_ifos) > 1:
                 fixed_ids, fixed_slide = \
                     coinc.time_multi_coincidence_by_time_delay(fixed_times, 0.,
