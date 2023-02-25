@@ -438,15 +438,16 @@ def time_multi_coincidence_by_time_delay(times, skyloc, slide_step=0,
     slide: array of int
         Slide ids of coincident triggers in pivot ifo
     """
-    def win(ifo1, ifo2):
+    def delay(ifo1, ifo2, skyloc):
         d1 = Detector(ifo1)
         d2 = Detector(ifo2)
-        return d1.light_travel_time_to_detector(d2) + slop
+        # Should this be d2.time_delay_from_detector(d1... ?
+        return d2.time_delay_from_detector(d1, skyloc['ra'], skyloc['dec'], skyloc['t_gps'])
 
     # Find coincs between the 'pivot' and 'fixed' detectors as in 2-ifo case
-    pivot_id, fix_id, slide = time_coincidence(times[pivot], times[fixed],
-                                               win(pivot, fixed),
-                                               slide_step=slide_step)
+    fix_id, pivot_id, slide = time_coincidence_by_time_delay(times[fixed], times[pivot],
+                                                             delay(fixed, pivot, skyloc),
+                                                             slide_step=slide_step)
 
     # Additional detectors do not slide independently of the 'fixed' one
     # Each trigger in an additional detector must be concident with both
