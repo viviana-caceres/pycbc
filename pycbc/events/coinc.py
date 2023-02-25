@@ -409,6 +409,115 @@ def time_multi_coincidence(times, slide_step=0, slop=.003,
     return ids, slide
 
 
+def time_multi_coincidence_by_time_delay(times, slide_step=0, slop=.003,
+                           pivot='H1', fixed='L1'):
+    """ Find multi detector coincidences.
+
+    Parameters
+    ----------
+    times: dict of numpy.ndarrays
+        Dictionary keyed by ifo of single ifo trigger times
+    slide_step: float
+        Interval between time slides
+    slop: float
+        The amount of time to add to the TOF between detectors for coincidence
+    pivot: str
+        The ifo to which time shifts are applied in first stage coincidence
+    fixed: str
+        The other ifo used in first stage coincidence, subsequently used as a
+        time reference for additional ifos. All other ifos are not time shifted
+        relative to this ifo
+
+    Returns
+    -------
+    ids: dict of arrays of int
+        Dictionary keyed by ifo with ids of trigger times forming coincidences.
+        Coincidence is tested for every pair of ifos that can be formed from
+        the input dict: only those tuples of times passing all tests are
+        recorded
+    slide: array of int
+        Slide ids of coincident triggers in pivot ifo
+    """
+    def win(ifo1, ifo2):
+        d1 = Detector(ifo1)
+        d2 = Detector(ifo2)
+        return d1.light_travel_time_to_detector(d2) + slop
+
+    # Find coincs between the 'pivot' and 'fixed' detectors as in 2-ifo case
+    pivot_id, fix_id, slide = time_coincidence(times[pivot], times[fixed],
+                                               win(pivot, fixed),
+                                               slide_step=slide_step)
+
+    # Additional detectors do not slide independently of the 'fixed' one
+    # Each trigger in an additional detector must be concident with both
+    # triggers in an existing coincidence
+
+    # Slide 'pivot' trigger times to be coincident with trigger times in
+    # 'fixed' detector
+    fixed_time = times[fixed][fix_id]
+    pivot_time = times[pivot][pivot_id] - slide_step * slide
+    ctimes = {fixed: fixed_time, pivot: pivot_time}
+    ids = {fixed: fix_id, pivot: pivot_id}
+
+    dep_ifos = [ifo for ifo in times.keys() if ifo != fixed and ifo != pivot]
+    for ifo1 in dep_ifos:
+        # FIXME - make this loop into a function?
+
+        # otime is extra ifo time in original trigger order
+        otime = times[ifo1]
+        # tsort gives ordering from original order to time sorted order
+        tsort = otime.argsort()
+        time1 = otime[tsort]
+
+        # Find coincidences between dependent ifo triggers and existing coincs
+        # - Cycle over fixed and pivot
+        # - At the 1st iteration, the fixed and pivot triggers are reduced to
+        #  those for which the first out of fixed/pivot forms a coinc with ifo1
+        # - At the 2nd iteration, we are left with triggers for which both
+        #  fixed and pivot are coincident with ifo1
+        # - If there is more than 1 dependent ifo, ones that were previously
+        #  tested against fixed and pivot are now present for testing with new
+        #  dependent ifos
+        for ifo2 in ids:
+            logging.info('added ifo %s, testing against %s' % (ifo1, ifo2))
+            w = win(ifo1, ifo2)
+            left = time1.searchsorted(ctimes[ifo2] - w)
+            right = time1.searchsorted(ctimes[ifo2] + w)
+            # Any times within time1 coincident with the time in ifo2 have
+            # indices between 'left' and 'right'
+            # 'nz' indexes into times in ifo2 which have coincidences with ifo1
+            # times
+            nz = (right - left).nonzero()
+            if len(right - left):
+                rlmax = (right - left).max()
+            if len(nz[0]) and rlmax > 1:
+                # We expect at most one coincident time in ifo1, assuming
+                #  trigger spacing in ifo1 > time window.
+                # However there are rare corner cases at starts/ends of inspiral
+                #  jobs. For these, arbitrarily keep the first trigger and
+                #  discard the second (and any subsequent ones).
+                logging.warning('Triggers in %s are closer than coincidence '
+                                'window, 1 or more coincs will be discarded. '
+                                'This is a warning, not an error.' % ifo1)
+            # identify indices of times in ifo1 that form coincs with ifo2
+            dep_ids = left[nz]
+            # slide is array of slide ids attached to pivot ifo
+            slide = slide[nz]
+
+            for ifo in ctimes:
+                # cycle over fixed and pivot & any previous additional ifos
+                # reduce times and IDs to just those forming a coinc with ifo1
+                ctimes[ifo] = ctimes[ifo][nz]
+                ids[ifo] = ids[ifo][nz]
+
+        # undo time sorting on indices of ifo1 triggers, add ifo1 ids and times
+        # to dicts for testing against any additional detectrs
+        ids[ifo1] = tsort[dep_ids]
+        ctimes[ifo1] = otime[ids[ifo1]]
+
+    return ids, slide
+
+
 def cluster_coincs(stat, time1, time2, timeslide_id, slide, window, **kwargs):
     """Cluster coincident events for each timeslide separately, across
     templates, based on the ranking statistic
