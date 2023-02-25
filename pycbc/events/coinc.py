@@ -35,6 +35,11 @@ from .eventmgr_cython import timecoincidence_getslideint
 from .eventmgr_cython import timecoincidence_findidxlen
 from .eventmgr_cython import timecluster_cython
 
+# Imports for PyNu
+from .eventmgr_cython import pynu_timecoincidence_constructidxs
+from .eventmgr_cython import pynu_timecoincidence_getslideint
+from .eventmgr_cython import pynu_timecoincidence_findidxlen
+
 
 def background_bin_from_string(background_bins, data):
     """ Return template ids for each bin as defined by the format string
