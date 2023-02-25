@@ -263,15 +263,8 @@ def time_coincidence_by_time_delay(
         length2 = len(t2)
         fold1 = numpy.zeros(length1, dtype=numpy.float64)
         fold2 = numpy.zeros(length2, dtype=numpy.float64)
-        construct_fold(
-            fold1,
-            fold2,
-            t1,
-            t2,
-            slide_step,
-            length1,
-            length2,
-            )
+        timecoincidence_constructfold(fold1, fold2, t1, t2, slide_step,
+                                      length1, length2)
     else:
         fold1 = t1
         fold2 = t2
@@ -289,32 +282,18 @@ def time_coincidence_by_time_delay(
         fold2 = numpy.concatenate([fold2 - slide_step, fold2, fold2
                                   + slide_step])
 
-    lenidx = find_lenidx(fold1, fold2, delay)
+    lenidx = pynu_timecoincidence_findidxlen(fold1, fold2, delay)
     idx1 = numpy.zeros(lenidx, dtype=numpy.uint32)
     idx2 = numpy.zeros(lenidx, dtype=numpy.uint32)
-    construct_idxs(
-        idx1,
-        idx2,
-        sort1,
-        sort2,
-        fold1,
-        fold2,
-        slide_step,
-        )
+    pynu_timecoincidence_constructidxs(idx1, idx2, sort1, sort2, fold1, fold2,
+                                       slide_step)
 
     # Now assign a slide to each trigger found
 
     slide = numpy.zeros(lenidx, dtype=numpy.int32)
     if slide_step:
-        get_slide_int(
-            slide,
-            t1,
-            t2,
-            idx1,
-            idx2,
-            delay,
-            slide_step,
-            )
+        pynu_timecoincidence_getslideint(slide, t1, t2, idx1, idx2, delay,
+                                         slide_step)
     else:
         slide = numpy.zeros(len(idx1))
 
