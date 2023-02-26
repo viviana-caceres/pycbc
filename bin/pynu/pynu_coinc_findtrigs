@@ -34,6 +34,8 @@ parser.add_argument("--fixed-ifo", required=True,
                          "multi detector coincidence")
 # produces a list of lists to allow multiple invocations and multiple args
 parser.add_argument("--use-maxalpha", action="store_true")
+parser.add_argument("--coinc-threshold", type=float, default=0.0,
+                    help="Seconds to add to time-of-flight coincidence window")
 
 # Sky location and time delay options
 parser.add_argument("--ra", type=float,
