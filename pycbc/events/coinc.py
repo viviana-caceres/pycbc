@@ -286,7 +286,7 @@ def time_coincidence_by_time_delay(
     idx1 = numpy.zeros(lenidx, dtype=numpy.uint32)
     idx2 = numpy.zeros(lenidx, dtype=numpy.uint32)
     pynu_timecoincidence_constructidxs(idx1, idx2, sort1, sort2, fold1, fold2,
-                                       slide_step)
+                                       slide_step, delay)
 
     # Now assign a slide to each trigger found
 
