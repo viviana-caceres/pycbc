@@ -347,8 +347,8 @@ def pynu_timecoincidence_constructidxs(
     cnp.ndarray[cnp.uint32_t, ndim=1] idx2,
     long int[:] sort1,
     long int[:] sort2,
-    long int[:] fold1,
-    long int[:] fold2,
+    double[:] fold1,
+    double[:] fold2,
     double slide_step,
     double delay
 ):
@@ -361,7 +361,7 @@ def pynu_timecoincidence_constructidxs(
     # For each trigger in fold1...
     for idx in range(len(fold1)):
         # We find where fold2 is equal to fold1 + delay
-        indices_of_correct_delays = np.array([], dtype=int)
+        indices_of_correct_delays = np.array([], dtype=np.uint32)
         for jdx in range(len(fold2)):
             if fold2[jdx] == fold1[idx] + delay:
                 indices_of_correct_delays = np.append(indices_of_correct_delays, jdx)
