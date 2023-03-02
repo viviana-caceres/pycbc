@@ -315,6 +315,7 @@ def pynu_timecoincidence_findidxlen(
     double[:] fold1,
     double[:] fold2,
     double delay,
+    double slop,
 ):
     cdef:
         int idx, tslength
@@ -333,7 +334,7 @@ def pynu_timecoincidence_findidxlen(
         # We find how many triggers in fold2 have the correct
         # value to coincide with each trigger in fold1
         for idx in range(len(fold2)): # This can later be changed to include an error
-            if fold2[idx] == correct_value:
+            if abs(fold2[idx]-correct_value) <= slop:
                 tslength += 1
 
     return tslength
@@ -350,7 +351,8 @@ def pynu_timecoincidence_constructidxs(
     double[:] fold1,
     double[:] fold2,
     double slide_step,
-    double delay
+    double delay,
+    double slop
 ):
     cdef:
         int idx, jdx, count
@@ -363,7 +365,7 @@ def pynu_timecoincidence_constructidxs(
         # We find where fold2 is equal to fold1 + delay
         indices_of_correct_delays = np.array([], dtype=np.uint32)
         for jdx in range(len(fold2)):
-            if fold2[jdx] == fold1[idx] + delay:
+            if abs(fold2[jdx] - fold1[idx] - delay) <= slop:
                 indices_of_correct_delays = np.append(indices_of_correct_delays, jdx)
 
         if slide_step:
