@@ -235,6 +235,7 @@ def time_coincidence_by_time_delay(
     t2,
     delay,
     slide_step=0,
+    slop=0,
     ):
     """ Find coincidences by time window
     Parameters
@@ -282,11 +283,11 @@ def time_coincidence_by_time_delay(
         fold2 = numpy.concatenate([fold2 - slide_step, fold2, fold2
                                   + slide_step])
 
-    lenidx = pynu_timecoincidence_findidxlen(fold1, fold2, delay)
+    lenidx = pynu_timecoincidence_findidxlen(fold1, fold2, delay, slop)
     idx1 = numpy.zeros(lenidx, dtype=numpy.uint32)
     idx2 = numpy.zeros(lenidx, dtype=numpy.uint32)
     pynu_timecoincidence_constructidxs(idx1, idx2, sort1, sort2, fold1, fold2,
-                                       slide_step, delay)
+                                       slide_step, delay, slop)
 
     # Now assign a slide to each trigger found
 
