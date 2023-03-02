@@ -366,7 +366,7 @@ def pynu_timecoincidence_constructidxs(
         indices_of_correct_delays = np.array([], dtype=np.uint32)
         for jdx in range(len(fold2)):
             if abs(fold2[jdx] - fold1[idx] - delay) <= slop:
-                indices_of_correct_delays = np.append(indices_of_correct_delays, jdx)
+                indices_of_correct_delays = np.append(indices_of_correct_delays, np.uint32(jdx))
 
         if slide_step:
         # Since fold2 is three times the length it should be, I
