@@ -249,6 +249,9 @@ def time_coincidence_by_time_delay(
     slide_step : float (default 0)
         If calculating background coincidences, the interval between background
         slides, arbitrary units (usually s)
+    slop : float (default 0)
+        Error window around delayed time.
+
     Returns
     -------
     idx1 : numpy.ndarray
@@ -422,6 +425,8 @@ def time_multi_coincidence_by_time_delay(times, skyloc, slide_step=0,
         Dictionary containing 't_gps', 'ra', and 'dec' of external trigger
     slide_step: float
         Interval between time slides
+    slop: float
+        Error window for delayed time.
     pivot: str
         The ifo to which time shifts are applied in first stage coincidence
     fixed: str
