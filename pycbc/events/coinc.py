@@ -411,7 +411,7 @@ def time_multi_coincidence(times, slide_step=0, slop=.003,
 
 
 def time_multi_coincidence_by_time_delay(times, skyloc, slide_step=0,
-                           pivot='H1', fixed='L1'):
+                           slop = 0., pivot='H1', fixed='L1'):
     """ Find multi detector coincidences.
 
     Parameters
@@ -448,7 +448,8 @@ def time_multi_coincidence_by_time_delay(times, skyloc, slide_step=0,
     # Find coincs between the 'pivot' and 'fixed' detectors as in 2-ifo case
     fix_id, pivot_id, slide = time_coincidence_by_time_delay(times[fixed], times[pivot],
                                                              delay(fixed, pivot, skyloc),
-                                                             slide_step=slide_step)
+                                                             slide_step = slide_step,
+                                                             slop = slop)
 
     # Additional detectors do not slide independently of the 'fixed' one
     # Each trigger in an additional detector must be concident with both
