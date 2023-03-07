@@ -333,8 +333,8 @@ def process_template(tnum):
             if len(fixed_ifos) > 1:
                 fixed_ids, fixed_slide = \
                     coinc.time_multi_coincidence_by_time_delay(fixed_times, skyloc,
-                                                               0., fixed_ifos[0],
-                                                               fixed_ifos[1])
+                                                               slide_step=0., fixed=fixed_ifos[0],
+                                                               pivot=fixed_ifos[1])
                 if len(fixed_slide) == 0:
                     start0 += args.batch_singles
                     continue
@@ -384,9 +384,9 @@ def process_template(tnum):
 
             # Do time coincidence for slides that will be kept after the last decimation
             ids, slide = coinc.time_multi_coincidence_by_time_delay(times, skyloc,
-                                                      args.timeslide_interval*total_factors[-1],
-                                                      args.pivot_ifo,
-                                                      args.fixed_ifo)
+                                                      slide_step=args.timeslide_interval*total_factors[-1],
+                                                      pivot=args.pivot_ifo,
+                                                      fixed=args.fixed_ifo)
             slide *= total_factors[-1]
 
             single_info = [(i, sds[i][ids[i]]) for i in trigs.ifos]
@@ -443,9 +443,9 @@ def process_template(tnum):
 
                 # Do time coincidence for the current decimation factor
                 set_ids, set_slide = coinc.time_multi_coincidence_by_time_delay(test_times, skyloc,
-                                                                  args.timeslide_interval*total_factors[kidx - 1],
-                                                                  args.pivot_ifo,
-                                                                  args.fixed_ifo)
+                                                                  slide_step=args.timeslide_interval*total_factors[kidx - 1],
+                                                                  pivot=args.pivot_ifo,
+                                                                  fixed=args.fixed_ifo)
                 set_slide *= total_factors[kidx - 1]
 
                 # Remove foreground triggers
