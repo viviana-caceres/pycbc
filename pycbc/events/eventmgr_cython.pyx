@@ -371,7 +371,8 @@ def pynu_timecoincidence_constructidxs(
         if slide_step:
         # Since fold2 is three times the length it should be, I
         # need to change the indices
-            indices_of_correct_delays %= int(len(fold2)/3)
+            for jdx in indices_of_correct_delays:
+                jdx %= int(len(fold2)/3)
 
         # Now we fill up our array with the indices of the correct delays
         for jdx in indices_of_correct_delays:
