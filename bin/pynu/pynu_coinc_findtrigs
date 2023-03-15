@@ -333,7 +333,8 @@ def process_template(tnum):
             if len(fixed_ifos) > 1:
                 fixed_ids, fixed_slide = \
                     coinc.time_multi_coincidence_by_time_delay(fixed_times, skyloc,
-                                                               slide_step=0., fixed=fixed_ifos[0],
+                                                               slide_step=0., slop=args.coinc_threshold,
+                                                               fixed=fixed_ifos[0],
                                                                pivot=fixed_ifos[1])
                 if len(fixed_slide) == 0:
                     start0 += args.batch_singles
@@ -385,6 +386,7 @@ def process_template(tnum):
             # Do time coincidence for slides that will be kept after the last decimation
             ids, slide = coinc.time_multi_coincidence_by_time_delay(times, skyloc,
                                                       slide_step=args.timeslide_interval*total_factors[-1],
+                                                      slop=args.coinc_threshold,
                                                       pivot=args.pivot_ifo,
                                                       fixed=args.fixed_ifo)
             slide *= total_factors[-1]
@@ -444,6 +446,7 @@ def process_template(tnum):
                 # Do time coincidence for the current decimation factor
                 set_ids, set_slide = coinc.time_multi_coincidence_by_time_delay(test_times, skyloc,
                                                                   slide_step=args.timeslide_interval*total_factors[kidx - 1],
+                                                                  slop=args.coinc_threshold,
                                                                   pivot=args.pivot_ifo,
                                                                   fixed=args.fixed_ifo)
                 set_slide *= total_factors[kidx - 1]
