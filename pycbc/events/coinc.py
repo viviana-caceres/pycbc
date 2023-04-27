@@ -450,9 +450,24 @@ def time_multi_coincidence_by_time_delay(times, skyloc, slide_step=0,
         # Should this be d2.time_delay_from_detector(d1... ?
         return d2.time_delay_from_detector(d1, skyloc['ra'], skyloc['dec'], skyloc['t_gps'])
 
+    TWOEARTH = 0.085
+    dt = delay(fixed, pivot, skyloc)
+
     # Find coincs between the 'pivot' and 'fixed' detectors as in 2-ifo case
+    if abs(dt) + slop > TWOEARTH:
+        slop = (-abs(dt) + slop + TWOEARTH) / 2
+        dt = (abs(dt) - slop + TWOEARTH) / 2
+        if delay(fixed, pivot, skyloc) < 0:
+            dt *= -1
+
+    if abs(dt) - slop < 0:
+        slop = (slop + abs(dt)) / 2
+        dt = slop
+        if delay(fixed, pivot, skyloc) < 0:
+            dt *= -1
+
     fix_id, pivot_id, slide = time_coincidence_by_time_delay(times[fixed], times[pivot],
-                                                             delay(fixed, pivot, skyloc),
+                                                             dt,
                                                              slide_step = slide_step,
                                                              slop = slop)
 
